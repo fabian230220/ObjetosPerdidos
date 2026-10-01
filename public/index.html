@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objetos Perdidos - Politécnico Grancolombiano</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-hover: #1e293b;
+            --accent: #2563eb;
+            --bg-page: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --input-bg: #f8fafc;
+            --border: #e2e8f0;
+            --success: #16a34a;
+            --error: #dc2626;
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 16px;
+        }
+
+        .app-card {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 440px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            border: 1px solid var(--border);
+            padding: 32px 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 580px;
+            transition: all 0.3s ease;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            justify-content: space-between;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #eff6ff;
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            width: fit-content;
+        }
+
+        .header-title h1 {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        .header-title p {
+            font-size: 14px;
+            color: var(--text-sub);
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        .btn-back {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 16px;
+            padding: 0;
+            width: fit-content;
+        }
+
+        .btn-back:hover {
+            color: var(--text-main);
+        }
+
+        .form-section {
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-header-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #334155;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .char-counter {
+            font-size: 11px;
+            color: var(--text-sub);
+        }
+
+        input, select {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 14px;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
+        }
+
+        .privacy-box {
+            font-size: 11px;
+            color: var(--text-sub);
+            line-height: 1.4;
+            background-color: #f8fafc;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .btn {
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            border: none;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text-main);
+            border: 1.5px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .location-card {
+            background-color: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            margin-top: 24px;
+        }
+
+        .location-card .tag {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-sub);
+            text-transform: uppercase;
+        }
+
+        .location-card .place {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 2px;
+        }
+
+        .error-banner {
+            background-color: #fef2f2;
+            color: var(--error);
+            border: 1px solid #fecaca;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            text-align: center;
+            display: none;
+        }
+
+        .success-box {
+            text-align: center;
+            margin: auto 0;
+        }
+
+        .success-icon {
+            width: 64px;
+            height: 64px;
+            background-color: #dcfce7;
+            color: var(--success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 16px auto;
+        }
+
+        .code-tag {
+            background-color: #f1f5f9;
+            color: var(--primary);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: 800;
+            display: inline-block;
+            margin: 14px 0 18px 0;
+            border: 1px dashed var(--border);
+        }
+
+        .info-table {
+            background-color: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 4px 14px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 13px;
+        }
+
+        .info-row:last-child { border-bottom: none; }
+        .info-row .lbl { color: var(--text-sub); }
+        .info-row .val { font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div class="app-card">
+        
+        <!-- PANTALLA 1: INICIO -->
+        <div id="screen-inicio" class="screen active">
+            <div>
+                <div class="brand-badge"> Politécnico Grancolombiano</div>
+                <div class="header-title">
+                    <h1>Gestión de<br>Objetos Perdidos</h1>
+                    <p>Canal oficial para el reporte y localización de pertenencias extraviadas dentro del campus universitario.</p>
+                </div>
+            </div>
+
+            <div class="location-card">
+                <div class="tag">¿Dónde reclamar o entregar?</div>
+                <div class="place">Oficina de Custodia u Objetos Perdidos</div>
+                <div style="font-size: 12px; color: var(--text-sub); margin-top: 2px;">Primer piso · Edificio Principal</div>
+            </div>
+
+            <div class="btn-group" style="margin-top: 24px;">
+                <button class="btn btn-primary" onclick="cambiarPantalla('screen-reporte')">
+                    Reportar Objeto Perdido
+                </button>
+                <button class="btn btn-outline" onclick="alert('El catálogo de objetos encontrados estará disponible en la siguiente fase de despliegue.')">
+                    Consultar Catálogo
+                </button>
+            </div>
+        </div>
+
+        <!-- PANTALLA 2: FORMULARIO DE REPORTE -->
+        <div id="screen-reporte" class="screen">
+            <div>
+                <button class="btn-back" onclick="cambiarPantalla('screen-inicio')">
+                    ← Volver al inicio
+                </button>
+                
+                <div class="header-title">
+                    <h1 style="font-size: 22px;">Registrar Pérdida</h1>
+                    <p style="font-size: 13px;">Diligencia la información para generar tu código único de seguimiento.</p>
+                </div>
+
+                <div class="form-section">
+                    
+                    <div class="form-group">
+                        <div class="form-header-label">
+                            <label for="descripcion">¿Qué perdiste?</label>
+                            <span class="char-counter" id="char-count">0/300</span>
+                        </div>
+                        <input type="text" id="descripcion" placeholder="Ej. Billetera de cuero negra con carné" maxlength="300" oninput="actualizarContador()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="categoria">Categoría</label>
+                        <select id="categoria">
+                            <option value="">Selecciona una opción...</option>
+                            <option value="Electrónicos">Electrónicos</option>
+                            <option value="Documentos">Documentos</option>
+                            <option value="Llaves">Llaves</option>
+                            <option value="Ropa y accesorios">Ropa y accesorios</option>
+                            <option value="Útiles académicos">Útiles académicos</option>
+                            <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lugar">Lugar aproximado</label>
+                        <input type="text" id="lugar" placeholder="Ej. Biblioteca 2do piso, Cafetería central">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fecha">Fecha de pérdida</label>
+                        <input type="date" id="fecha">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contacto">Correo Institucional</label>
+                        <input type="email" id="contacto" placeholder="usuario@poligran.edu.co">
+                    </div>
+
+                </div>
+
+                <div class="privacy-box">
+                     <strong>Privacidad:</strong> Tu reporte se guarda de forma confidencial para validación del personal de custodia.
+                </div>
+
+                <div id="error-banner" class="error-banner"></div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" id="btn-submit" onclick="enviarReporte()">
+                    Enviar Reporte
+                </button>
+            </div>
+        </div>
+
+        <!-- PANTALLA 3: CONFIRMACIÓN Y CÓDIGO -->
+        <div id="screen-exito" class="screen">
+            <div class="success-box">
+                <div class="success-icon">✓</div>
+                <h1 style="font-size: 22px;">¡Reporte Registrado!</h1>
+                <p style="font-size: 13px; color: var(--text-sub); margin-top: 6px;">
+                    Tu solicitud ha sido ingresada al sistema institucional.
+                </p>
+
+                <div class="code-tag" id="codigoResultado">OP-XXXXXX</div>
+
+                <div class="info-table">
+                    <div class="info-row">
+                        <span class="lbl">Estado de alerta</span>
+                        <span class="val" style="color: var(--success);">Activo</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="lbl">Seguimiento</span>
+                        <span class="val">Portería / Administración</span>
+                    </div>
+                </div>
+
+                <p style="font-size: 11px; color: var(--text-sub); line-height: 1.4;">
+                    Conserva este código. Te servirá de comprobante al momento de reclamar tu pertenencia.
+                </p>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="limpiarYVolver()">
+                    Finalizar y Volver al Inicio
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function cambiarPantalla(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            ocultarError();
+        }
+
+        // Limitar la fecha máxima al día actual
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('fecha').max = today;
+
+        // Contador de caracteres para la descripción
+        function actualizarContador() {
+            const input = document.getElementById('descripcion');
+            document.getElementById('char-count').innerText = `${input.value.length}/300`;
+        }
+
+        function mostrarError(msg) {
+            const banner = document.getElementById('error-banner');
+            banner.innerText = msg;
+            banner.style.display = 'block';
+        }
+
+        function ocultarError() {
+            const banner = document.getElementById('error-banner');
+            banner.innerText = '';
+            banner.style.display = 'none';
+        }
+
+        async function enviarReporte() {
+            const descripcion = document.getElementById('descripcion').value.trim();
+            const categoria = document.getElementById('categoria').value;
+            const lugar = document.getElementById('lugar').value.trim();
+            const fecha = document.getElementById('fecha').value;
+            const contacto = document.getElementById('contacto').value.trim();
+            const btnSubmit = document.getElementById('btn-submit');
+
+            ocultarError();
+
+            if (!descripcion || !categoria || !lugar || !fecha || !contacto) {
+                mostrarError("Por favor completa todos los campos obligatorios.");
+                return;
+            }
+
+            if (descripcion.length < 5) {
+                mostrarError("La descripción debe contener al menos 5 caracteres.");
+                return;
+            }
+
+            if (lugar.length < 3) {
+                mostrarError("El lugar debe contener al menos 3 caracteres.");
+                return;
+            }
+
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@poligran\.edu\.co$/;
+            if (!emailRegex.test(contacto)) {
+                mostrarError("Ingresa un correo institucional válido (@poligran.edu.co).");
+                return;
+            }
+
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "Registrando...";
+
+            try {
+                const res = await fetch('/api/reportes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ descripcion, categoria, lugar, fecha, contacto })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    document.getElementById('codigoResultado').innerText = data.codigo;
+                    cambiarPantalla('screen-exito');
+                } else {
+                    mostrarError(data.mensaje || "Ocurrió un error al registrar.");
+                }
+            } catch (err) {
+                mostrarError("Error de conexión con el servidor local.");
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "Enviar Reporte";
+            }
+        }
+
+        function limpiarYVolver() {
+            document.getElementById('descripcion').value = '';
+            document.getElementById('categoria').value = '';
+            document.getElementById('lugar').value = '';
+            document.getElementById('fecha').value = '';
+            document.getElementById('contacto').value = '';
+            actualizarContador();
+            cambiarPantalla('screen-inicio');
+        }
+    </script>
+</body>
+</html>
