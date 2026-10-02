@@ -343,6 +343,7 @@ Proyecto académico desarrollado por:
 
 * Edgar Fabian Garcia Florez
 * Heiner Lambraño Osorio
+* Danilo Rendon Torres
 
 ## Licencia
 
