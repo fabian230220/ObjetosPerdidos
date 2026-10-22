@@ -20,10 +20,14 @@ db.prepare(`
         lugar TEXT,
         fecha_perdida TEXT,
         contacto TEXT,
+        estado TEXT DEFAULT 'Activo',
         fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
     )
 `).run();
-
+try {
+    db.prepare("ALTER TABLE reportes ADD COLUMN estado TEXT DEFAULT 'Activo'").run();
+} catch (e) {
+}
 function generarCodigoUnico() {
     const caracteres = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let codigo = 'OP-';
@@ -34,7 +38,7 @@ function generarCodigoUnico() {
 }
 
 const categoriasValidas = [
-    "Electrónicos", "Documentos", "Llaves", 
+    "Electrónicos", "Documentos", "Llaves",
     "Ropa y accesorios", "Útiles académicos", "Otros"
 ];
 
@@ -113,7 +117,73 @@ app.post('/api/reportes', (req, res) => {
         return res.status(500).json({ exito: false, mensaje: "Error interno en el servidor." });
     }
 });
+// Consultar estado de un reporte por Código (OP-XXXXXX)
+app.get('/api/reportes/:codigo', (req, res) => {
+    const codigo = req.params.codigo.trim().toUpperCase();
 
+    try {
+        const stmt = db.prepare('SELECT codigo_seguimiento, descripcion, categoria, lugar, fecha_perdida, estado, fecha_registro FROM reportes WHERE codigo_seguimiento = ?');
+        const reporte = stmt.get(codigo);
+
+        if (!reporte) {
+            return res.status(404).json({ exito: false, mensaje: "No se encontró ningún reporte con ese código." });
+        }
+
+        return res.json({ exito: true, reporte });
+    } catch (error) {
+        return res.status(500).json({ exito: false, mensaje: "Error al consultar la base de datos." });
+    }
+});
+
+// Consultar Catálogo público
+app.get('/api/catalogo', (req, res) => {
+    const { categoria } = req.query;
+    let query = "SELECT descripcion, categoria, lugar, fecha_perdida, estado FROM reportes WHERE estado != 'Entregado'";
+    const params = [];
+
+    if (categoria && categoria !== 'Todas') {
+        query += ' AND categoria = ?';
+        params.push(categoria);
+    }
+
+    query += ' ORDER BY id DESC';
+
+    try {
+        const stmt = db.prepare(query);
+        const objetos = stmt.all(...params);
+        return res.json({ exito: true, objetos });
+    } catch (error) {
+        return res.status(500).json({ exito: false, mensaje: "Error al obtener el catálogo." });
+    }
+});
+// Actualizar estado de reporte (Protegido por PIN de administración)
+app.patch('/api/reportes/:codigo/estado', (req, res) => {
+    const codigo = req.params.codigo.trim().toUpperCase();
+    const { nuevoEstado, pinAdmin } = req.body;
+
+    // Validación de clave administrativa para evitar que cualquiera cambie el estado
+    if (pinAdmin !== '2302') {
+        return res.status(403).json({ exito: false, mensaje: 'Acceso denegado: PIN de administración incorrecto.' });
+    }
+
+    const estadosValidos = ['Activo', 'En Custodia', 'Entregado'];
+    if (!nuevoEstado || !estadosValidos.includes(nuevoEstado)) {
+        return res.status(400).json({ exito: false, mensaje: 'Estado no válido.' });
+    }
+
+    try {
+        const stmt = db.prepare('UPDATE reportes SET estado = ? WHERE codigo_seguimiento = ?');
+        const result = stmt.run(nuevoEstado, codigo);
+
+        if (result.changes === 0) {
+            return res.status(404).json({ exito: false, mensaje: 'No se encontró ningún reporte con ese código.' });
+        }
+
+        return res.json({ exito: true, mensaje: `Estado actualizado a "${nuevoEstado}" con éxito.` });
+    } catch (error) {
+        return res.status(500).json({ exito: false, mensaje: 'Error interno al actualizar estado.' });
+    }
+});
 app.listen(PORT, () => {
     console.log(`Servidor con validaciones estrictas en http://localhost:${PORT}`);
 });
