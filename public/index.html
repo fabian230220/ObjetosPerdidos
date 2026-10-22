@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -65,8 +66,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .brand-badge {
@@ -147,7 +155,8 @@
             color: var(--text-sub);
         }
 
-        input, select {
+        input,
+        select {
             width: 100%;
             background-color: var(--input-bg);
             border: 1px solid var(--border);
@@ -158,7 +167,8 @@
             transition: all 0.2s;
         }
 
-        input:focus, select:focus {
+        input:focus,
+        select:focus {
             outline: none;
             border-color: var(--primary);
             background-color: #ffffff;
@@ -298,37 +308,51 @@
             font-size: 13px;
         }
 
-        .info-row:last-child { border-bottom: none; }
-        .info-row .lbl { color: var(--text-sub); }
-        .info-row .val { font-weight: 700; }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-row .lbl {
+            color: var(--text-sub);
+        }
+
+        .info-row .val {
+            font-weight: 700;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="app-card">
-        
+
         <!-- PANTALLA 1: INICIO -->
         <div id="screen-inicio" class="screen active">
             <div>
                 <div class="brand-badge"> Politécnico Grancolombiano</div>
                 <div class="header-title">
                     <h1>Gestión de<br>Objetos Perdidos</h1>
-                    <p>Canal oficial para el reporte y localización de pertenencias extraviadas dentro del campus universitario.</p>
+                    <p>Canal oficial para el reporte y localización de pertenencias extraviadas dentro del campus
+                        universitario.</p>
                 </div>
             </div>
 
             <div class="location-card">
                 <div class="tag">¿Dónde reclamar o entregar?</div>
                 <div class="place">Oficina de Custodia u Objetos Perdidos</div>
-                <div style="font-size: 12px; color: var(--text-sub); margin-top: 2px;">Primer piso · Edificio Principal</div>
+                <div style="font-size: 12px; color: var(--text-sub); margin-top: 2px;">Primer piso · Edificio Principal
+                </div>
             </div>
 
             <div class="btn-group" style="margin-top: 24px;">
                 <button class="btn btn-primary" onclick="cambiarPantalla('screen-reporte')">
                     Reportar Objeto Perdido
                 </button>
-                <button class="btn btn-outline" onclick="alert('El catálogo de objetos encontrados estará disponible en la siguiente fase de despliegue.')">
+                <button class="btn btn-outline" onclick="cargarCatalogo(); cambiarPantalla('screen-catalogo');">
                     Consultar Catálogo
+                </button>
+                <button class="btn btn-outline" onclick="cambiarPantalla('screen-consulta')">
+                    Buscar por Código
                 </button>
             </div>
         </div>
@@ -339,20 +363,22 @@
                 <button class="btn-back" onclick="cambiarPantalla('screen-inicio')">
                     ← Volver al inicio
                 </button>
-                
+
                 <div class="header-title">
                     <h1 style="font-size: 22px;">Registrar Pérdida</h1>
-                    <p style="font-size: 13px;">Diligencia la información para generar tu código único de seguimiento.</p>
+                    <p style="font-size: 13px;">Diligencia la información para generar tu código único de seguimiento.
+                    </p>
                 </div>
 
                 <div class="form-section">
-                    
+
                     <div class="form-group">
                         <div class="form-header-label">
                             <label for="descripcion">¿Qué perdiste?</label>
                             <span class="char-counter" id="char-count">0/300</span>
                         </div>
-                        <input type="text" id="descripcion" placeholder="Ej. Billetera de cuero negra con carné" maxlength="300" oninput="actualizarContador()">
+                        <input type="text" id="descripcion" placeholder="Ej. Billetera de cuero negra con carné"
+                            maxlength="300" oninput="actualizarContador()">
                     </div>
 
                     <div class="form-group">
@@ -386,7 +412,8 @@
                 </div>
 
                 <div class="privacy-box">
-                     <strong>Privacidad:</strong> Tu reporte se guarda de forma confidencial para validación del personal de custodia.
+                    <strong>Privacidad:</strong> Tu reporte se guarda de forma confidencial para validación del personal
+                    de custodia.
                 </div>
 
                 <div id="error-banner" class="error-banner"></div>
@@ -398,14 +425,67 @@
                 </button>
             </div>
         </div>
+        <!-- NUEVA PANTALLA: BUSCAR POR CÓDIGO -->
+        <div id="screen-consulta" class="screen">
+            <div>
+                <button class="btn-back" onclick="cambiarPantalla('screen-inicio')">← Volver al inicio</button>
+                <div class="header-title">
+                    <h1 style="font-size: 22px;">Consultar Estado</h1>
+                    <p style="font-size: 13px;">Ingresa tu código de seguimiento (ej. OP-XXXXXX) para verificar tu
+                        reporte.</p>
+                </div>
 
+                <div class="form-section">
+                    <div class="form-group">
+                        <label for="input-codigo">Código de Seguimiento</label>
+                        <input type="text" id="input-codigo" placeholder="OP-XXXXXX" style="text-transform: uppercase;">
+                    </div>
+                    <button class="btn btn-primary" onclick="buscarCodigo()">Buscar Reporte</button>
+                </div>
+
+                <div id="resultado-busqueda"
+                    style="display: none; margin-top: 15px; background-color: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid var(--border);">
+                    <div style="font-weight: 700;" id="res-descripcion"></div>
+                    <div style="font-size: 12px; color: var(--text-sub); margin-top: 4px;" id="res-lugar"></div>
+                </div>
+
+                <div id="error-consulta" class="error-banner" style="margin-top: 15px;"></div>
+            </div>
+        </div>
+
+        <!-- NUEVA PANTALLA: CATÁLOGO -->
+        <div id="screen-catalogo" class="screen">
+            <div>
+                <button class="btn-back" onclick="cambiarPantalla('screen-inicio')">← Volver al inicio</button>
+                <div class="header-title">
+                    <h1 style="font-size: 22px;">Catálogo Público</h1>
+                    <p style="font-size: 13px;">Pertenencias reportadas recientemente en la institución.</p>
+                </div>
+
+                <div class="form-group" style="margin-top: 10px;">
+                    <select id="filtro-categoria" onchange="cargarCatalogo()">
+                        <option value="Todas">Todas las categorías</option>
+                        <option value="Electrónicos">Electrónicos</option>
+                        <option value="Documentos">Documentos</option>
+                        <option value="Llaves">Llaves</option>
+                        <option value="Ropa y accesorios">Ropa y accesorios</option>
+                        <option value="Útiles académicos">Útiles académicos</option>
+                        <option value="Otros">Otros</option>
+                    </select>
+                </div>
+
+                <div id="lista-catalogo"
+                    style="display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; margin-top: 10px;">
+                </div>
+            </div>
+        </div>
         <!-- PANTALLA 3: CONFIRMACIÓN Y CÓDIGO -->
         <div id="screen-exito" class="screen">
             <div class="success-box">
                 <div class="success-icon">✓</div>
                 <h1 style="font-size: 22px;">¡Reporte Registrado!</h1>
                 <p style="font-size: 13px; color: var(--text-sub); margin-top: 6px;">
-                    Tu solicitud ha sido ingresada al sistema institucional.
+                    Tu alerta fue registrada con éxito. Te avisaremos si alguien lo encuentra y entrega en portería..
                 </p>
 
                 <div class="code-tag" id="codigoResultado">OP-XXXXXX</div>
@@ -530,6 +610,136 @@
             actualizarContador();
             cambiarPantalla('screen-inicio');
         }
+        async function buscarCodigo() {
+            const codigo = document.getElementById('input-codigo').value.trim();
+            const resContainer = document.getElementById('resultado-busqueda');
+            const errBanner = document.getElementById('error-consulta');
+
+            resContainer.style.display = 'none';
+            errBanner.style.display = 'none';
+
+            if (!codigo) {
+                errBanner.innerText = "Ingresa un código válido.";
+                errBanner.style.display = 'block';
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/reportes/${codigo}`);
+                const data = await res.json();
+
+                if (res.ok) {
+                    const estadoColor = data.reporte.estado === 'Activo' ? 'var(--error)' : 'var(--success)';
+
+                    resContainer.innerHTML = `
+                <div style="font-weight: 700; font-size: 14px;">${data.reporte.descripcion}</div>
+                <div style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">📍 ${data.reporte.lugar} · ${data.reporte.categoria}</div>
+                <div style="margin-top: 10px; font-size: 12px;">
+                    <strong>Estado actual:</strong> 
+                    <span style="color: ${estadoColor}; font-weight:700;">${data.reporte.estado}</span>
+                </div>
+                
+                <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border);">
+                    <div style="font-size: 11px; font-weight:700; color:var(--text-sub); margin-bottom: 6px;">Módulo Custodia (Uso Portería):</div>
+                    <div style="display: flex; gap: 6px;">
+                        <button class="btn btn-outline" style="padding: 6px 10px; font-size: 11px;" onclick="cambiarEstadoConPin('${data.reporte.codigo_seguimiento}', 'En Custodia')">Marcar 'En Custodia'</button>
+                        <button class="btn btn-outline" style="padding: 6px 10px; font-size: 11px;" onclick="cambiarEstadoConPin('${data.reporte.codigo_seguimiento}', 'Entregado')">Marcar 'Entregado'</button>
+                    </div>
+                </div>
+            `;
+                    resContainer.style.display = 'block';
+                } else {
+                    errBanner.innerText = data.mensaje;
+                    errBanner.style.display = 'block';
+                }
+            } catch (err) {
+                errBanner.innerText = "Error de conexión con el servidor.";
+                errBanner.style.display = 'block';
+            }
+        }
+
+        async function cambiarEstadoConPin(codigo, nuevoEstado) {
+            const pin = prompt("Ingrese el PIN de autorización de portería:");
+            if (!pin) return;
+
+            try {
+                const res = await fetch(`/api/reportes/${codigo}/estado`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nuevoEstado, pinAdmin: pin })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert(data.mensaje);
+                    buscarCodigo(); // Recargar la vista con el estado actualizado
+                } else {
+                    alert("⚠️ " + data.mensaje);
+                }
+            } catch (err) {
+                alert("Error al conectar con el servidor.");
+            }
+        }
+
+        async function cargarCatalogo() {
+            const categoria = document.getElementById('filtro-categoria').value;
+            const listContainer = document.getElementById('lista-catalogo');
+
+            listContainer.innerHTML = '<p style="font-size:12px; color:var(--text-sub); text-align:center; padding:15px;">Cargando catálogo...</p>';
+
+            try {
+                const res = await fetch(`/api/catalogo?categoria=${categoria}`);
+                const data = await res.json();
+
+                if (res.ok && data.objetos.length > 0) {
+                    listContainer.innerHTML = `
+                <div style="font-size: 11px; font-weight:700; color:var(--text-sub); margin-bottom: 8px;">
+                    Mostrando ${data.objetos.length} registro(s) pendiente(s)
+                </div>
+            ` + data.objetos.map(obj => {
+                        const esCustodia = obj.estado === 'En Custodia';
+                        const badgeColor = esCustodia ? '#dcfce7' : '#fef3c7';
+                        const textColor = esCustodia ? '#15803d' : '#b45309';
+                        const estadoTexto = esCustodia ? 'En Custodia (Portería)' : 'En Búsqueda Activa';
+
+                        return `
+                    <div style="background-color:#ffffff; border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:10px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                            <div style="font-size:14px; font-weight:700; color:var(--text-main);">${obj.descripcion}</div>
+                            <span style="background-color:${badgeColor}; color:${textColor}; font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px; white-space:nowrap;">
+                                ${estadoTexto}
+                            </span>
+                        </div>
+                        
+                        <div style="font-size:12px; color:var(--text-sub); margin-top:8px; display:flex; flex-direction:column; gap:3px;">
+                            <div>📍 <strong>Lugar aproximado:</strong> ${obj.lugar}</div>
+                            <div>🏷️ <strong>Categoría:</strong> ${obj.categoria}</div>
+                            <div>📅 <strong>Fecha de reporte:</strong> ${obj.fecha_perdida}</div>
+                        </div>
+
+                        ${esCustodia ? `
+                            <div style="margin-top:10px; padding:8px; background-color:#f8fafc; border-radius:6px; font-size:11px; color:var(--text-sub); border:1px solid var(--border);">
+                                💡 <strong>Para reclamar:</strong> Preséntate en la Oficina de Custodia con tu carné y tu código único de seguimiento.
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                    }).join('');
+                } else {
+                    listContainer.innerHTML = `
+                <div style="text-align:center; padding:20px; background-color:#f8fafc; border-radius:10px; border:1px solid var(--border);">
+                    <div style="font-size:24px; margin-bottom:6px;">🔍</div>
+                    <p style="font-size:13px; font-weight:700; color:var(--text-main);">Sin pertenencias activas</p>
+                    <p style="font-size:11px; color:var(--text-sub); margin-top:2px;">No hay objetos pendientes en esta categoría.</p>
+                </div>
+            `;
+                }
+            } catch (err) {
+                listContainer.innerHTML = '<p style="font-size:12px; color:var(--error); text-align:center;">Error al cargar el catálogo público.</p>';
+            }
+        }
     </script>
 </body>
+
 </html>
