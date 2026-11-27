@@ -319,17 +319,155 @@
         .info-row .val {
             font-weight: 700;
         }
+        #toast-container {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 340px;
+            width: calc(100% - 36px);
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            padding: 13px 16px;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.4;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            animation: toastSlideIn 0.25s ease-out;
+        }
+
+        .toast-success { background-color: var(--success); }
+        .toast-error { background-color: var(--error); }
+        .toast-info { background-color: var(--primary); }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 18px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        @keyframes toastSlideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(2px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            z-index: 1000;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #ffffff;
+            width: 100%;
+            max-width: 380px;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 35px rgba(15, 23, 42, 0.2);
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-box h3 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .modal-box p {
+            font-size: 13px;
+            color: var(--text-sub);
+            line-height: 1.45;
+            margin-bottom: 16px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
     </style>
 </head>
 
 <body>
+        <div id="toast-container" aria-live="polite"></div>
+        <div id="modal-confirmar" class="modal-overlay" role="dialog" aria-modal="true">
+            <div class="modal-box">
+                <h3 id="confirm-titulo">Confirmar acción</h3>
+                <p id="confirm-mensaje">¿Deseas continuar con esta operación?</p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" id="btn-confirm-cancelar">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btn-confirm-aceptar">Confirmar</button>
+                </div>
+            </div>
+        </div>
+        <!-- Modal de Inicio de Sesión de Portería (B-21) -->
+    <div id="modal-login" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="login-titulo">
+        <div class="modal-box">
+            <h3 id="login-titulo">Acceso Personal de Portería</h3>
+            <p>Ingresa las credenciales autorizadas de custodia para gestionar hallazgos y entregas.</p>
 
+            <div class="form-group">
+                <label for="login-usuario">Usuario</label>
+                <input type="text" id="login-usuario" placeholder="porteria_principal" autocomplete="username">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="login-clave">Contraseña</label>
+                <input type="password" id="login-clave" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') iniciarSesionPorteria()">
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline" onclick="cerrarModalLogin()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btn-login-submit" onclick="iniciarSesionPorteria()">Ingresar</button>
+            </div>
+        </div>
+    </div>
     <div class="app-card">
 
         <!-- PANTALLA 1: INICIO -->
         <div id="screen-inicio" class="screen active">
             <div>
-                <div class="brand-badge"> Politécnico Grancolombiano</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                    <div class="brand-badge" style="margin-bottom: 0;">Politécnico Grancolombiano</div>
+                    <div id="porteria-nav-controls" style="display: flex; gap: 6px; align-items: center;">
+                        <button type="button" id="btn-abrir-login" class="btn btn-outline" style="padding: 5px 10px; font-size: 11px; width: auto;" onclick="abrirModalLogin()">
+                            Acceso Portería
+                        </button>
+                        <button type="button" id="btn-ir-porteria" class="btn btn-primary" style="padding: 5px 10px; font-size: 11px; width: auto; display: none;" onclick="abrirPanelPorteria()">
+                            Panel Portería
+                        </button>
+                        <button type="button" id="btn-cerrar-sesion" class="btn btn-outline" style="padding: 5px 10px; font-size: 11px; width: auto; display: none; color: var(--error); border-color: #fecaca;" onclick="cerrarSesionPorteria()">
+                            Salir
+                        </button>
+                    </div>
+                </div>
                 <div class="header-title">
                     <h1>Gestión de<br>Objetos Perdidos</h1>
                     <p>Canal oficial para el reporte y localización de pertenencias extraviadas dentro del campus
@@ -512,21 +650,151 @@
                 </button>
             </div>
         </div>
+<!-- PANTALLA 4: PANEL ADMINISTRATIVO DE PORTERÍA (B-21 y B-22) -->
+        <div id="screen-porteria" class="screen">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <button class="btn-back" style="margin-bottom: 0;" onclick="cambiarPantalla('screen-inicio')">← Volver al inicio</button>
+                    <span style="font-size: 11px; font-weight: 700; color: var(--success); background: #dcfce7; padding: 3px 9px; border-radius: 12px;">
+                        Sesión Portería
+                    </span>
+                </div>
 
+                <div class="header-title">
+                    <h1 style="font-size: 22px;">Gestión de Portería</h1>
+                    <p style="font-size: 13px;">Recepciona hallazgos físicos y administra el inventario en custodia.</p>
+                </div>
+
+                <!-- Sub-pestañas internas -->
+                <div style="display: flex; gap: 8px; margin: 14px 0;">
+                    <button type="button" id="subtab-recepcion" class="btn btn-primary" style="padding: 9px; font-size: 12px;" onclick="cambiarSubtabPorteria('recepcion')">
+                        + Registrar Hallazgo
+                    </button>
+                    <button type="button" id="subtab-inventario" class="btn btn-outline" style="padding: 9px; font-size: 12px;" onclick="cambiarSubtabPorteria('inventario')">
+                        Inventario / Custodia
+                    </button>
+                </div>
+
+                <!-- VISTA A: RECEPCIÓN DIRECTA DE HALLAZGO (B-22) -->
+                <div id="porteria-view-recepcion">
+                    <div class="form-group">
+                        <label for="rec-descripcion">Objeto hallado</label>
+                        <input type="text" id="rec-descripcion" maxlength="300" placeholder="Ej. Termo metálico azul encontrado en sala">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rec-categoria">Categoría</label>
+                        <select id="rec-categoria">
+                            <option value="">Selecciona una opción...</option>
+                            <option value="Electrónicos">Electrónicos</option>
+                            <option value="Documentos">Documentos</option>
+                            <option value="Llaves">Llaves</option>
+                            <option value="Ropa y accesorios">Ropa y accesorios</option>
+                            <option value="Útiles académicos">Útiles académicos</option>
+                            <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rec-lugar">Lugar donde fue encontrado</label>
+                        <input type="text" id="rec-lugar" maxlength="100" placeholder="Ej. Plazoleta central, Bloque B">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rec-fecha">Fecha del hallazgo</label>
+                        <input type="date" id="rec-fecha">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rec-ubicacion">Ubicación física en portería</label>
+                        <input type="text" id="rec-ubicacion" maxlength="60" placeholder="Ej. Locker B-04, Estante 2 - Caja A">
+                    </div>
+
+                    <button type="button" class="btn btn-primary" id="btn-rec-submit" onclick="registrarHallazgoPorteria()">
+                        Guardar en Custodia
+                    </button>
+                </div>
+
+                <!-- VISTA B: INVENTARIO Y CAMBIO DE ESTADOS -->
+                <div id="porteria-view-inventario" style="display: none;">
+                    <div id="lista-inventario-porteria" style="display: flex; flex-direction: column; gap: 10px; max-height: 360px; overflow-y: auto; padding-right: 2px;">
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        function mostrarToast(mensaje, tipo = 'info', duracion = 5000) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${tipo}`;
+
+            const span = document.createElement('span');
+            span.textContent = mensaje;
+
+            const btnCerrar = document.createElement('button');
+            btnCerrar.className = 'toast-close';
+            btnCerrar.innerHTML = '×';
+            btnCerrar.onclick = () => toast.remove();
+
+            toast.appendChild(span);
+            toast.appendChild(btnCerrar);
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(20px)';
+                    toast.style.transition = 'all 0.25s ease';
+                    setTimeout(() => toast.remove(), 250);
+                }
+            }, duracion);
+        }
+
+        function pedirConfirmacion(titulo, mensaje) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('modal-confirmar');
+                document.getElementById('confirm-titulo').innerText = titulo;
+                document.getElementById('confirm-mensaje').innerText = mensaje;
+                modal.classList.add('open');
+
+                const btnCancelar = document.getElementById('btn-confirm-cancelar');
+                const btnAceptar = document.getElementById('btn-confirm-aceptar');
+
+                const limpiar = (resultado) => {
+                    modal.classList.remove('open');
+                    btnCancelar.onclick = null;
+                    btnAceptar.onclick = null;
+                    resolve(resultado);
+                };
+
+                btnCancelar.onclick = () => limpiar(false);
+                btnAceptar.onclick = () => limpiar(true);
+            });
+        }
+
         function cambiarPantalla(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             ocultarError();
         }
 
-        // Limitar la fecha máxima al día actual
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('fecha').max = today;
+        async function sincronizarFechaLocal() {
+            try {
+                const res = await fetch('/api/fecha-hoy');
+                const data = await res.json();
+                if (data.fecha) {
+                    document.getElementById('fecha').max = data.fecha;
+                    return data.fecha;
+                }
+            } catch (_) {}
+            const hoyLocal = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date());
+            document.getElementById('fecha').max = hoyLocal;
+            return hoyLocal;
+        }
+        sincronizarFechaLocal();
 
-        // Contador de caracteres para la descripción
         function actualizarContador() {
             const input = document.getElementById('descripcion');
             document.getElementById('char-count').innerText = `${input.value.length}/300`;
@@ -536,6 +804,7 @@
             const banner = document.getElementById('error-banner');
             banner.innerText = msg;
             banner.style.display = 'block';
+            mostrarToast(msg, 'error', 4000);
         }
 
         function ocultarError() {
@@ -590,6 +859,8 @@
                 if (res.ok) {
                     document.getElementById('codigoResultado').innerText = data.codigo;
                     cambiarPantalla('screen-exito');
+                    // Escenario 3 Gherkin: Toast verde por 5 segundos con el código OP asignado
+                    mostrarToast(`¡Reporte registrado con éxito! Código: ${data.codigo}`, 'success', 5000);
                 } else {
                     mostrarError(data.mensaje || "Ocurrió un error al registrar.");
                 }
@@ -610,6 +881,269 @@
             actualizarContador();
             cambiarPantalla('screen-inicio');
         }
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '\u0026amp;')
+                .replace(/</g, '\u0026lt;')
+                .replace(/>/g, '\u0026gt;')
+                .replace(/"/g, '\u0026quot;')
+                .replace(/'/g, '\u0026#39;');
+        }
+
+        // ==========================================
+        // AUTENTICACIÓN MODAL DE PORTERÍA (B-21)
+        // ==========================================
+        function obtenerTokenPorteria() {
+            return sessionStorage.getItem('porteria_token');
+        }
+
+        function actualizarControlesPorteria() {
+            const autenticado = Boolean(obtenerTokenPorteria());
+            document.getElementById('btn-abrir-login').style.display = autenticado ? 'none' : 'inline-block';
+            document.getElementById('btn-ir-porteria').style.display = autenticado ? 'inline-block' : 'none';
+            document.getElementById('btn-cerrar-sesion').style.display = autenticado ? 'inline-block' : 'none';
+        }
+
+        function abrirModalLogin() {
+            document.getElementById('login-usuario').value = '';
+            document.getElementById('login-clave').value = '';
+            document.getElementById('modal-login').classList.add('open');
+            setTimeout(() => document.getElementById('login-usuario').focus(), 50);
+        }
+
+        function cerrarModalLogin() {
+            document.getElementById('modal-login').classList.remove('open');
+        }
+
+        async function iniciarSesionPorteria() {
+            const usuario = document.getElementById('login-usuario').value.trim();
+            const clave = document.getElementById('login-clave').value;
+            const btn = document.getElementById('btn-login-submit');
+
+            if (!usuario || !clave) {
+                mostrarToast('Ingresa usuario y contraseña de portería.', 'error', 4000);
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Verificando...';
+
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario, clave })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    mostrarToast(data.mensaje || 'Credenciales incorrectas.', 'error', 4000);
+                    return;
+                }
+
+                sessionStorage.setItem('porteria_token', data.token);
+                cerrarModalLogin();
+                actualizarControlesPorteria();
+                mostrarToast('Sesión de portería iniciada.', 'success', 3500);
+                abrirPanelPorteria();
+            } catch (err) {
+                mostrarToast('Error de conexión con el servidor.', 'error', 4000);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Ingresar';
+            }
+        }
+
+        function cerrarSesionPorteria() {
+            sessionStorage.removeItem('porteria_token');
+            actualizarControlesPorteria();
+            cambiarPantalla('screen-inicio');
+            mostrarToast('Sesión de portería cerrada.', 'info', 3000);
+        }
+
+        // ==========================================
+        // PANEL DE PORTERÍA: RECEPCIÓN E INVENTARIO (B-22)
+        // ==========================================
+        async function abrirPanelPorteria() {
+            if (!obtenerTokenPorteria()) {
+                abrirModalLogin();
+                return;
+            }
+            const hoy = await sincronizarFechaLocal();
+            const inputRecFecha = document.getElementById('rec-fecha');
+            inputRecFecha.max = hoy;
+            if (!inputRecFecha.value) inputRecFecha.value = hoy;
+
+            cambiarPantalla('screen-porteria');
+            cambiarSubtabPorteria('recepcion');
+        }
+
+        function cambiarSubtabPorteria(tab) {
+            const esRecepcion = tab === 'recepcion';
+            document.getElementById('porteria-view-recepcion').style.display = esRecepcion ? 'block' : 'none';
+            document.getElementById('porteria-view-inventario').style.display = esRecepcion ? 'none' : 'block';
+
+            document.getElementById('subtab-recepcion').className = esRecepcion ? 'btn btn-primary' : 'btn btn-outline';
+            document.getElementById('subtab-inventario').className = !esRecepcion ? 'btn btn-primary' : 'btn btn-outline';
+
+            if (!esRecepcion) {
+                cargarInventarioPorteria();
+            }
+        }
+
+        async function registrarHallazgoPorteria() {
+            const token = obtenerTokenPorteria();
+            if (!token) return abrirModalLogin();
+
+            const descripcion = document.getElementById('rec-descripcion').value.trim();
+            const categoria = document.getElementById('rec-categoria').value;
+            const lugar = document.getElementById('rec-lugar').value.trim();
+            const fecha = document.getElementById('rec-fecha').value;
+            const ubicacion_fisica = document.getElementById('rec-ubicacion').value.trim();
+            const btn = document.getElementById('btn-rec-submit');
+
+            if (!descripcion || !categoria || !lugar || !fecha || !ubicacion_fisica) {
+                mostrarToast('Completa todos los campos, incluida la ubicación física.', 'error', 4000);
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Guardando...';
+
+            try {
+                const res = await fetch('/api/admin/recepcion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-token': token
+                    },
+                    body: JSON.stringify({ descripcion, categoria, lugar, fecha, ubicacion_fisica })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    mostrarToast(data.mensaje || 'Error al registrar hallazgo.', 'error', 4000);
+                    return;
+                }
+
+                document.getElementById('rec-descripcion').value = '';
+                document.getElementById('rec-categoria').value = '';
+                document.getElementById('rec-lugar').value = '';
+                document.getElementById('rec-ubicacion').value = '';
+
+                mostrarToast(`Hallazgo guardado en ${data.ubicacion_fisica}. Código: ${data.codigo}`, 'success', 5000);
+                cambiarSubtabPorteria('inventario');
+            } catch (err) {
+                mostrarToast('Error de conexión con el servidor.', 'error', 4000);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Guardar en Custodia';
+            }
+        }
+
+        async function cargarInventarioPorteria() {
+            const token = obtenerTokenPorteria();
+            if (!token) return;
+
+            const container = document.getElementById('lista-inventario-porteria');
+            container.innerHTML = '<p style="font-size:12px; color:var(--text-sub); text-align:center; padding:12px;">Cargando inventario...</p>';
+
+            try {
+                const res = await fetch('/api/admin/reportes', {
+                    headers: { 'x-admin-token': token }
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    mostrarToast(data.mensaje || 'Sesión expirada.', 'error', 4000);
+                    cerrarSesionPorteria();
+                    return;
+                }
+
+                if (!data.reportes || data.reportes.length === 0) {
+                    container.innerHTML = '<p style="font-size:12px; color:var(--text-sub); text-align:center; padding:16px;">No hay reportes registrados.</p>';
+                    return;
+                }
+
+                container.innerHTML = data.reportes.map(rep => {
+                    const esCustodia = rep.estado === 'En Custodia';
+                    const esEntregado = rep.estado === 'Entregado';
+                    const badgeBg = esCustodia ? '#dcfce7' : esEntregado ? '#e2e8f0' : '#fef3c7';
+                    const badgeColor = esCustodia ? '#15803d' : esEntregado ? '#475569' : '#b45309';
+
+                    return `
+                        <div style="background:#ffffff; border:1px solid var(--border); border-radius:12px; padding:12px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+                                <span style="font-family:monospace; font-size:12px; font-weight:800; color:var(--accent);">${escapeHtml(rep.codigo_seguimiento)}</span>
+                                <span style="background:${badgeBg}; color:${badgeColor}; font-size:10px; font-weight:800; padding:2px 8px; border-radius:10px;">${escapeHtml(rep.estado)}</span>
+                            </div>
+                            <div style="font-size:13px; font-weight:700; margin-top:4px;">${escapeHtml(rep.descripcion)}</div>
+                            <div style="font-size:11px; color:var(--text-sub); margin-top:4px;">
+                                📍 ${escapeHtml(rep.lugar)} · 🏷️ ${escapeHtml(rep.categoria)}<br>
+                                📦 <strong>Ubicación física:</strong> ${rep.ubicacion_fisica ? escapeHtml(rep.ubicacion_fisica) : 'Sin asignar'}
+                            </div>
+
+                            ${!esEntregado ? `
+                                <div style="margin-top:10px; padding-top:8px; border-top:1px dashed var(--border); display:flex; flex-direction:column; gap:6px;">
+                                    <input type="text" id="ubic-${escapeHtml(rep.codigo_seguimiento)}" placeholder="Ej. Locker B-04" value="${rep.ubicacion_fisica ? escapeHtml(rep.ubicacion_fisica) : ''}" style="padding:8px 10px; font-size:12px;">
+                                    <div style="display:flex; gap:6px;">
+                                        <button type="button" class="btn btn-outline" style="padding:7px 8px; font-size:11px;" onclick="actualizarEstadoPorteria('${escapeHtml(rep.codigo_seguimiento)}', 'En Custodia')">
+                                            En Custodia
+                                        </button>
+                                        <button type="button" class="btn btn-primary" style="padding:7px 8px; font-size:11px;" onclick="confirmarEntregaPorteria('${escapeHtml(rep.codigo_seguimiento)}')">
+                                            Entregado
+                                        </button>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                container.innerHTML = '<p style="font-size:12px; color:var(--error); text-align:center;">Error al cargar inventario.</p>';
+            }
+        }
+
+        async function actualizarEstadoPorteria(codigo, nuevoEstado) {
+            const token = obtenerTokenPorteria();
+            if (!token) return abrirModalLogin();
+
+            const inputUbic = document.getElementById(`ubic-${codigo}`);
+            const ubicacion_fisica = inputUbic ? inputUbic.value.trim() : '';
+
+            try {
+                const res = await fetch(`/api/reportes/${encodeURIComponent(codigo)}/estado`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-token': token
+                    },
+                    body: JSON.stringify({ nuevoEstado, ubicacion_fisica })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    mostrarToast(data.mensaje || 'No se pudo actualizar.', 'error', 4000);
+                    return;
+                }
+
+                mostrarToast(data.mensaje, 'success', 4000);
+                cargarInventarioPorteria();
+            } catch (err) {
+                mostrarToast('Error de conexión con el servidor.', 'error', 4000);
+            }
+        }
+
+        async function confirmarEntregaPorteria(codigo) {
+            const confirmado = await pedirConfirmacion(
+                'Confirmar Entrega al Dueño',
+                `¿Confirmas que el estudiante presentó su carné institucional y el código ${codigo}? El objeto pasará a "Entregado" y saldrá del catálogo público.`
+            );
+            if (confirmado) {
+                await actualizarEstadoPorteria(codigo, 'Entregado');
+            }
+        }
+
         async function buscarCodigo() {
             const codigo = document.getElementById('input-codigo').value.trim();
             const resContainer = document.getElementById('resultado-busqueda');
@@ -625,28 +1159,26 @@
             }
 
             try {
-                const res = await fetch(`/api/reportes/${codigo}`);
+                const res = await fetch(`/api/reportes/${encodeURIComponent(codigo)}`);
                 const data = await res.json();
 
                 if (res.ok) {
+                    const esCustodia = data.reporte.estado === 'En Custodia';
                     const estadoColor = data.reporte.estado === 'Activo' ? 'var(--error)' : 'var(--success)';
 
                     resContainer.innerHTML = `
-                <div style="font-weight: 700; font-size: 14px;">${data.reporte.descripcion}</div>
-                <div style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">📍 ${data.reporte.lugar} · ${data.reporte.categoria}</div>
-                <div style="margin-top: 10px; font-size: 12px;">
-                    <strong>Estado actual:</strong> 
-                    <span style="color: ${estadoColor}; font-weight:700;">${data.reporte.estado}</span>
-                </div>
-                
-                <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border);">
-                    <div style="font-size: 11px; font-weight:700; color:var(--text-sub); margin-bottom: 6px;">Módulo Custodia (Uso Portería):</div>
-                    <div style="display: flex; gap: 6px;">
-                        <button class="btn btn-outline" style="padding: 6px 10px; font-size: 11px;" onclick="cambiarEstadoConPin('${data.reporte.codigo_seguimiento}', 'En Custodia')">Marcar 'En Custodia'</button>
-                        <button class="btn btn-outline" style="padding: 6px 10px; font-size: 11px;" onclick="cambiarEstadoConPin('${data.reporte.codigo_seguimiento}', 'Entregado')">Marcar 'Entregado'</button>
-                    </div>
-                </div>
-            `;
+                        <div style="font-weight: 700; font-size: 14px;">${escapeHtml(data.reporte.descripcion)}</div>
+                        <div style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">📍 ${escapeHtml(data.reporte.lugar)} · ${escapeHtml(data.reporte.categoria)}</div>
+                        <div style="margin-top: 10px; font-size: 12px;">
+                            <strong>Estado actual:</strong>
+                            <span style="color: ${estadoColor}; font-weight:700;">${escapeHtml(data.reporte.estado)}</span>
+                        </div>
+                        ${esCustodia ? `
+                            <div style="margin-top: 10px; padding: 8px; background: #dcfce7; color: #15803d; border-radius: 8px; font-size: 11px; font-weight: 600;">
+                                Tu pertenencia ya está resguardada en la Oficina de Custodia. Acércate con tu carné institucional y este código.
+                            </div>
+                        ` : ''}
+                    `;
                     resContainer.style.display = 'block';
                 } else {
                     errBanner.innerText = data.mensaje;
@@ -658,30 +1190,6 @@
             }
         }
 
-        async function cambiarEstadoConPin(codigo, nuevoEstado) {
-            const pin = prompt("Ingrese el PIN de autorización de portería:");
-            if (!pin) return;
-
-            try {
-                const res = await fetch(`/api/reportes/${codigo}/estado`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nuevoEstado, pinAdmin: pin })
-                });
-
-                const data = await res.json();
-
-                if (res.ok) {
-                    alert(data.mensaje);
-                    buscarCodigo(); // Recargar la vista con el estado actualizado
-                } else {
-                    alert("⚠️ " + data.mensaje);
-                }
-            } catch (err) {
-                alert("Error al conectar con el servidor.");
-            }
-        }
-
         async function cargarCatalogo() {
             const categoria = document.getElementById('filtro-categoria').value;
             const listContainer = document.getElementById('lista-catalogo');
@@ -689,57 +1197,58 @@
             listContainer.innerHTML = '<p style="font-size:12px; color:var(--text-sub); text-align:center; padding:15px;">Cargando catálogo...</p>';
 
             try {
-                const res = await fetch(`/api/catalogo?categoria=${categoria}`);
+                const res = await fetch(`/api/catalogo?categoria=${encodeURIComponent(categoria)}`);
                 const data = await res.json();
 
                 if (res.ok && data.objetos.length > 0) {
                     listContainer.innerHTML = `
-                <div style="font-size: 11px; font-weight:700; color:var(--text-sub); margin-bottom: 8px;">
-                    Mostrando ${data.objetos.length} registro(s) pendiente(s)
-                </div>
-            ` + data.objetos.map(obj => {
+                        <div style="font-size: 11px; font-weight:700; color:var(--text-sub); margin-bottom: 8px;">
+                            Mostrando ${data.objetos.length} registro(s) pendiente(s)
+                        </div>
+                    ` + data.objetos.map(obj => {
                         const esCustodia = obj.estado === 'En Custodia';
                         const badgeColor = esCustodia ? '#dcfce7' : '#fef3c7';
                         const textColor = esCustodia ? '#15803d' : '#b45309';
                         const estadoTexto = esCustodia ? 'En Custodia (Portería)' : 'En Búsqueda Activa';
 
                         return `
-                    <div style="background-color:#ffffff; border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:10px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-                            <div style="font-size:14px; font-weight:700; color:var(--text-main);">${obj.descripcion}</div>
-                            <span style="background-color:${badgeColor}; color:${textColor}; font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px; white-space:nowrap;">
-                                ${estadoTexto}
-                            </span>
-                        </div>
-                        
-                        <div style="font-size:12px; color:var(--text-sub); margin-top:8px; display:flex; flex-direction:column; gap:3px;">
-                            <div>📍 <strong>Lugar aproximado:</strong> ${obj.lugar}</div>
-                            <div>🏷️ <strong>Categoría:</strong> ${obj.categoria}</div>
-                            <div>📅 <strong>Fecha de reporte:</strong> ${obj.fecha_perdida}</div>
-                        </div>
+                            <div style="background-color:#ffffff; border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:10px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                                    <div style="font-size:14px; font-weight:700; color:var(--text-main);">${escapeHtml(obj.descripcion)}</div>
+                                    <span style="background-color:${badgeColor}; color:${textColor}; font-size:10px; font-weight:800; padding:3px 8px; border-radius:12px; white-space:nowrap;">
+                                        ${estadoTexto}
+                                    </span>
+                                </div>
 
-                        ${esCustodia ? `
-                            <div style="margin-top:10px; padding:8px; background-color:#f8fafc; border-radius:6px; font-size:11px; color:var(--text-sub); border:1px solid var(--border);">
-                                💡 <strong>Para reclamar:</strong> Preséntate en la Oficina de Custodia con tu carné y tu código único de seguimiento.
+                                <div style="font-size:12px; color:var(--text-sub); margin-top:8px; display:flex; flex-direction:column; gap:3px;">
+                                    <div>📍 <strong>Lugar aproximado:</strong> ${escapeHtml(obj.lugar)}</div>
+                                    <div>🏷️ <strong>Categoría:</strong> ${escapeHtml(obj.categoria)}</div>
+                                    <div>📅 <strong>Fecha de reporte:</strong> ${escapeHtml(obj.fecha_perdida)}</div>
+                                </div>
+
+                                ${esCustodia ? `
+                                    <div style="margin-top:10px; padding:8px; background-color:#f8fafc; border-radius:6px; font-size:11px; color:var(--text-sub); border:1px solid var(--border);">
+                                        💡 <strong>Para reclamar:</strong> Preséntate en la Oficina de Custodia con tu carné y tu código único de seguimiento.
+                                    </div>
+                                ` : ''}
                             </div>
-                        ` : ''}
-                    </div>
-                `;
+                        `;
                     }).join('');
                 } else {
                     listContainer.innerHTML = `
-                <div style="text-align:center; padding:20px; background-color:#f8fafc; border-radius:10px; border:1px solid var(--border);">
-                    <div style="font-size:24px; margin-bottom:6px;">🔍</div>
-                    <p style="font-size:13px; font-weight:700; color:var(--text-main);">Sin pertenencias activas</p>
-                    <p style="font-size:11px; color:var(--text-sub); margin-top:2px;">No hay objetos pendientes en esta categoría.</p>
-                </div>
-            `;
+                        <div style="text-align:center; padding:20px; background-color:#f8fafc; border-radius:10px; border:1px solid var(--border);">
+                            <div style="font-size:24px; margin-bottom:6px;">🔍</div>
+                            <p style="font-size:13px; font-weight:700; color:var(--text-main);">Sin pertenencias activas</p>
+                            <p style="font-size:11px; color:var(--text-sub); margin-top:2px;">No hay objetos pendientes en esta categoría.</p>
+                        </div>
+                    `;
                 }
             } catch (err) {
                 listContainer.innerHTML = '<p style="font-size:12px; color:var(--error); text-align:center;">Error al cargar el catálogo público.</p>';
             }
         }
+
+        actualizarControlesPorteria();
     </script>
 </body>
-
 </html>
